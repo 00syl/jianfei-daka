@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#ff6b6b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="减肥打卡">
+  <title>减肥打卡工作台</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --coral: #ff6b6b;
+      --coral-dark: #ee5a5a;
+      --mint: #4ecdc4;
+      --mint-dark: #3bb3ab;
+      --bg: #f7f9fb;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e9ecef;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --header-height: 56px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body {
+      padding-bottom: 90px;
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(135deg, var(--coral) 0%, var(--mint) 100%);
+      color: white;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 15px rgba(255, 107, 107, 0.25);
+    }
+
+    .app-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-actions button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .header-actions button:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Date strip */
+    .date-strip {
+      text-align: center;
+      margin-bottom: 16px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .date-strip .today {
+      color: var(--coral);
+      font-weight: 700;
+      background: #fff0f0;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-left: 8px;
+    }
+
+    /* Overview cards */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .overview-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .overview-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .overview-card .value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--coral);
+      line-height: 1.2;
+    }
+
+    .overview-card .label {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      position: sticky;
+      top: var(--header-height);
+      z-index: 99;
+      background: var(--bg);
+      padding: 10px 0;
+      margin: 0 -16px 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-list {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px;
+      min-width: max-content;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      border: none;
+      background: white;
+      color: var(--text-light);
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--coral);
+      color: white;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: white;
+      color: var(--coral);
+    }
+
+    /* Tab panels */
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--coral);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      background: #fafbfc;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--mint);
+      background: white;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--coral);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--coral-dark);
+    }
+
+    .btn-mint {
+      background: var(--mint);
+      color: white;
+    }
+
+    .btn-mint:hover {
+      background: var(--mint-dark);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #dde2e6;
+    }
+
+    .btn-danger {
+      background: #ff4757;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #ee3a4a;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Tables */
+    .data-table-wrapper {
+      overflow-x: auto;
+      margin-top: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: white;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: 700;
+      color: var(--text-light);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .delete-btn {
+      background: #fff0f0;
+      color: var(--coral);
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background: var(--coral);
+      color: white;
+    }
+
+    /* Reminder cards */
+    .reminder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .reminder-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .reminder-card.active-alert {
+      border-color: var(--coral);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(255, 107, 107, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+
+    .reminder-card h3 {
+      margin: 0 0 6px 0;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .reminder-time {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--coral);
+    }
+
+    .countdown {
+      font-size: 12px;
+      color: var(--text-light);
+      margin: 8px 0;
+      height: 18px;
+    }
+
+    .reminder-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 10px 0;
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--mint);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .check-btn {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .check-btn.taken {
+      background: var(--mint);
+    }
+
+    /* Diet cards */
+    .diet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .diet-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .diet-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .diet-card.done {
+      border-color: var(--mint);
+      background: #f0fdfa;
+    }
+
+    .diet-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .diet-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .diet-status {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Progress bars */
+    .progress-section {
+      margin-bottom: 14px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: #e9ecef;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--coral), var(--mint));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    /* Chart containers */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .chart-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 10px;
+    }
+
+    /* Goals */
+    .goal-inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: #2c3e50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      z-index: 1000;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+      box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.06);
+      z-index: 100;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 11px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--coral);
+    }
+
+    .bottom-nav-icon {
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* Visual alert overlay */
+    #visual-alert {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, var(--coral), #ff8f8f);
+      color: white;
+      padding: 14px 16px;
+      z-index: 98;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    #visual-alert.show {
+      display: flex;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+
+    .visual-alert-text {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .visual-alert-close {
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .modal-text {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .hidden-file-input {
+      display: none;
+    }
+
+    /* Responsive improvements */
+    @media (min-width: 768px) {
+      .form-grid.two-col {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .overview-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-actions button span {
+        display: none;
+      }
+
+      .header-actions button {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>减肥打卡工作台</h1>
+    <div class="header-actions">
+      <button onclick="exportData()" title="导出备份"><span>导出</span> 💾</button>
+      <button onclick="document.getElementById('importFile').click()" title="导入备份"><span>导入</span> 📂</button>
+      <button onclick="confirmClearData()" title="清空数据"><span>清空</span> 🗑️</button>
+      <button onclick="requestNotificationPermission()" title="开启通知">🔔</button>
+    </div>
+    <input type="file" id="importFile" class="hidden-file-input" accept=".json" onchange="importData(this)">
+  </header>
+
+  <div id="visual-alert">
+    <div class="visual-alert-text" id="visual-alert-text">⏰ 到点吃药啦！</div>
+    <button class="visual-alert-close" onclick="dismissVisualAlert()">已服用</button>
+  </div>
+
+  <main class="container">
+    <div class="date-strip">
+      今天是 <span class="today" id="todayDate"></span>
+    </div>
+
+    <section class="overview-grid">
+      <div class="overview-card">
+        <div class="value" id="currentWeight">--</div>
+        <div class="label">当前体重 (kg)</div>
+      </div>
+      <div class="overview-card">
+        <div class="value" id="weightLoss">--</div>
+        <div class="label">累计减重 (kg)</div>
+      </div>
+      <div class="overview-card">
+        <div class="value" id="weeklyExercise">--</div>
+        <div class="label">本周运动 (分钟)</div>
+      </div>
+      <div class="overview-card">
+        <div class="value" id="streakDays">--</div>
+        <div class="label">连续打卡 (天)</div>
+      </div>
+    </section>
+
+    <nav class="tab-bar">
+      <div class="tab-list">
+        <button class="tab-btn active" data-tab="weight">体重记录</button>
+        <button class="tab-btn" data-tab="measurements">身体维度</button>
+        <button class="tab-btn" data-tab="exercise">运动记录</button>
+        <button class="tab-btn" data-tab="reminders">提醒打卡</button>
+        <button class="tab-btn" data-tab="charts">数据图表</button>
+        <button class="tab-btn" data-tab="goals">目标设置</button>
+      </div>
+    </nav>
+
+    <!-- 体重记录 -->
+    <section class="tab-panel active" id="tab-weight">
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>记录今日体重</h2>
+        <div class="form-grid two-col">
+          <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="weightDate">
+          </div>
+          <div class="form-group">
+            <label>体重 (kg)</label>
+            <input type="number" id="weightValue" step="0.1" placeholder="例如 65.5">
+          </div>
+          <div class="form-group">
+            <label>体脂率 (%)</label>
+            <input type="number" id="weightFat" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group full-width">
+            <label>备注</label>
+            <textarea id="weightNote" placeholder="今天感觉如何？"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addWeight()">保存体重记录</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>体重历史</h2>
+        <div class="data-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>体重</th>
+                <th>体脂率</th>
+                <th>备注</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="weightTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="weightEmpty" style="display:none">还没有体重记录，快去记录第一条吧！</div>
+      </div>
+    </section>
+
+    <!-- 身体维度 -->
+    <section class="tab-panel" id="tab-measurements">
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>记录身体维度</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="measureDate">
+          </div>
+          <div class="form-group">
+            <label>胸围 (cm)</label>
+            <input type="number" id="measureChest" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group">
+            <label>腰围 (cm)</label>
+            <input type="number" id="measureWaist" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group">
+            <label>臀围 (cm)</label>
+            <input type="number" id="measureHip" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group">
+            <label>大臂 (cm)</label>
+            <input type="number" id="measureUpperArm" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group">
+            <label>小臂 (cm)</label>
+            <input type="number" id="measureForearm" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group">
+            <label>大腿 (cm)</label>
+            <input type="number" id="measureThigh" step="0.1" placeholder="可选">
+          </div>
+          <div class="form-group">
+            <label>小腿 (cm)</label>
+            <input type="number" id="measureCalf" step="0.1" placeholder="可选">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addMeasurement()">保存维度记录</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>维度历史</h2>
+        <div class="data-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>胸围</th>
+                <th>腰围</th>
+                <th>臀围</th>
+                <th>大臂</th>
+                <th>小臂</th>
+                <th>大腿</th>
+                <th>小腿</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="measureTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="measureEmpty" style="display:none">还没有维度记录。</div>
+      </div>
+    </section>
+
+    <!-- 运动记录 -->
+    <section class="tab-panel" id="tab-exercise">
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>记录今日运动</h2>
+        <div class="form-grid two-col">
+          <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="exerciseDate">
+          </div>
+          <div class="form-group">
+            <label>运动类型</label>
+            <select id="exerciseType">
+              <option value="aerobic">有氧运动</option>
+              <option value="strength">力量训练</option>
+              <option value="flexibility">柔韧性</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>项目名称</label>
+            <input type="text" id="exerciseName" placeholder="例如 跑步、瑜伽">
+          </div>
+          <div class="form-group">
+            <label>时长 (分钟)</label>
+            <input type="number" id="exerciseDuration" step="1" placeholder="30">
+          </div>
+          <div class="form-group">
+            <label>消耗热量 (kcal)</label>
+            <input type="number" id="exerciseCalories" step="1" placeholder="可选">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addExercise()">保存运动记录</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>运动历史</h2>
+        <div class="data-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>类型</th>
+                <th>项目</th>
+                <th>时长</th>
+                <th>热量</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="exerciseTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="exerciseEmpty" style="display:none">还没有运动记录，动起来！</div>
+      </div>
+    </section>
+
+    <!-- 提醒打卡 -->
+    <section class="tab-panel" id="tab-reminders">
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>吃药提醒</h2>
+        <div class="reminder-grid">
+          <div class="reminder-card" id="morningCard">
+            <h3>早上</h3>
+            <div class="reminder-time" id="morningTime">07:30</div>
+            <div class="countdown" id="morningCountdown">--</div>
+            <div class="reminder-toggle">
+              <span>启用</span>
+              <label class="switch">
+                <input type="checkbox" id="morningEnabled" checked onchange="updateReminderSettings()">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-mint check-btn" id="morningBtn" onclick="takeMedicine('morning')">已服用</button>
+          </div>
+          <div class="reminder-card" id="noonCard">
+            <h3>中午</h3>
+            <div class="reminder-time" id="noonTime">12:00</div>
+            <div class="countdown" id="noonCountdown">--</div>
+            <div class="reminder-toggle">
+              <span>启用</span>
+              <label class="switch">
+                <input type="checkbox" id="noonEnabled" checked onchange="updateReminderSettings()">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-mint check-btn" id="noonBtn" onclick="takeMedicine('noon')">已服用</button>
+          </div>
+          <div class="reminder-card" id="eveningCard">
+            <h3>晚上</h3>
+            <div class="reminder-time" id="eveningTime">18:00</div>
+            <div class="countdown" id="eveningCountdown">--</div>
+            <div class="reminder-toggle">
+              <span>启用</span>
+              <label class="switch">
+                <input type="checkbox" id="eveningEnabled" checked onchange="updateReminderSettings()">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-mint check-btn" id="eveningBtn" onclick="takeMedicine('evening')">已服用</button>
+          </div>
+        </div>
+        <div class="modal-text" style="margin-bottom:0">
+          💡 提示：PWA 页面需要保持在前台才能正常弹出提醒。建议配合手机系统闹钟使用，或点击右上角铃铛开启浏览器通知权限。
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>饮食打卡</h2>
+        <div class="diet-grid">
+          <div class="diet-card" id="vegetableCard" onclick="toggleDiet('vegetables')">
+            <div class="diet-icon">🥬</div>
+            <div class="diet-name">吃蔬菜</div>
+            <div class="diet-status" id="vegetableStatus">未完成</div>
+          </div>
+          <div class="diet-card" id="proteinCard" onclick="toggleDiet('protein')">
+            <div class="diet-icon">🥚</div>
+            <div class="diet-name">吃蛋白质</div>
+            <div class="diet-status" id="proteinStatus">未完成</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>今日总览</h2>
+        <div class="form-grid">
+          <div class="overview-card">
+            <div class="value" id="todayMedicine">0/3</div>
+            <div class="label">今日已服药</div>
+          </div>
+          <div class="overview-card">
+            <div class="value" id="todayDiet">0/2</div>
+            <div class="label">今日饮食打卡</div>
+          </div>
+          <div class="overview-card">
+            <div class="value" id="todayExerciseMinutes">0</div>
+            <div class="label">今日运动 (分钟)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 数据图表 -->
+    <section class="tab-panel" id="tab-charts">
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>体重趋势</h2>
+        <div class="chart-container">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-grid">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>维度变化</h2>
+          <div class="chart-container">
+            <canvas id="measurementChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>运动时长</h2>
+          <div class="chart-container">
+            <canvas id="exerciseDurationChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>热量消耗</h2>
+          <div class="chart-container">
+            <canvas id="caloriesChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>运动类型分布</h2>
+          <div class="chart-container">
+            <canvas id="exerciseTypeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 目标设置 -->
+    <section class="tab-panel" id="tab-goals">
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>我的目标</h2>
+        <div class="goal-inputs">
+          <div class="form-group">
+            <label>起始体重 (kg)</label>
+            <input type="number" id="goalStartWeight" step="0.1" placeholder="例如 70">
+          </div>
+          <div class="form-group">
+            <label>目标体重 (kg)</label>
+            <input type="number" id="goalTargetWeight" step="0.1" placeholder="例如 60">
+          </div>
+          <div class="form-group">
+            <label>每日运动目标 (分钟)</label>
+            <input type="number" id="goalDailyExercise" step="1" placeholder="例如 30">
+          </div>
+          <div class="form-group">
+            <label>目标腰围 (cm)</label>
+            <input type="number" id="goalWaist" step="0.1" placeholder="例如 70">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveGoals()">保存目标</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span class="dot"></span>目标进度</h2>
+        <div id="goalProgressContainer">
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>体重进度</span>
+              <span id="weightProgressText">--</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="weightProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>腰围进度</span>
+              <span id="waistProgressText">--</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="waistProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>今日运动</span>
+              <span id="exerciseProgressText">--</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="exerciseProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-item active" data-tab="weight" onclick="switchTab('weight')">
+      <div class="bottom-nav-icon">⚖️</div>
+      <div>体重</div>
+    </div>
+    <div class="bottom-nav-item" data-tab="measurements" onclick="switchTab('measurements')">
+      <div class="bottom-nav-icon">📏</div>
+      <div>维度</div>
+    </div>
+    <div class="bottom-nav-item" data-tab="exercise" onclick="switchTab('exercise')">
+      <div class="bottom-nav-icon">🏃</div>
+      <div>运动</div>
+    </div>
+    <div class="bottom-nav-item" data-tab="reminders" onclick="switchTab('reminders')">
+      <div class="bottom-nav-icon">⏰</div>
+      <div>打卡</div>
+    </div>
+    <div class="bottom-nav-item" data-tab="charts" onclick="switchTab('charts')">
+      <div class="bottom-nav-icon">📊</div>
+      <div>图表</div>
+    </div>
+    <div class="bottom-nav-item" data-tab="goals" onclick="switchTab('goals')">
+      <div class="bottom-nav-icon">🎯</div>
+      <div>目标</div>
+    </div>
+  </nav>
+
+  <div id="toast"></div>
+
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal-title">确认清空数据？</div>
+      <div class="modal-text">此操作将删除所有本地记录，且无法撤销。建议先导出备份。</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-danger" onclick="clearAllData()">确认清空</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===========================
+    // Data & Storage
+    // ===========================
+    const STORAGE_KEY = 'weightLossTracker';
+
+    const defaultData = {
+      weights: [],
+      measurements: [],
+      exercises: [],
+      dietLog: {},
+      goals: {
+        startWeight: 70,
+        targetWeight: 60,
+        dailyExercise: 30,
+        goalWaist: 70
+      },
+      reminders: {
+        morning: '07:30',
+        noon: '12:00',
+        evening: '18:00',
+        enabled: true
+      }
+    };
+
+    let appData = JSON.parse(JSON.stringify(defaultData));
+    let chartInstances = {};
+    let reminderInterval = null;
+    let lastNotified = { morning: null, noon: null, evening: null };
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appData = deepMerge(JSON.parse(JSON.stringify(defaultData)), parsed);
+        } else {
+          appData = JSON.parse(JSON.stringify(defaultData));
+        }
+      } catch (e) {
+        console.error('Load data failed', e);
+        appData = JSON.parse(JSON.stringify(defaultData));
+      }
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        showToast('保存失败，可能是存储空间不足');
+        console.error('Save data failed', e);
+      }
+    }
+
+    function deepMerge(target, source) {
+      for (const key in source) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+          if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+          deepMerge(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      }
+      return target;
+    }
+
+    function getTodayStr() {
+      const now = new Date();
+      return formatDate(now);
+    }
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseDate(str) {
+      const [y, m, d] = str.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    // ===========================
+    // Initialization
+    // ===========================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      initServiceWorker();
+      initDateInputs();
+      initTabs();
+      updateUI();
+      startReminderLoop();
+      document.getElementById('todayDate').textContent = getTodayStr();
+    });
+
+    function initServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then(() => console.log('SW registered'))
+          .catch(err => console.error('SW registration failed', err));
+      }
+    }
+
+    function initDateInputs() {
+      const today = getTodayStr();
+      document.getElementById('weightDate').value = today;
+      document.getElementById('measureDate').value = today;
+      document.getElementById('exerciseDate').value = today;
+    }
+
+    function initTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchTab(btn.dataset.tab);
+        });
+      });
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
+
+      const panel = document.getElementById(`tab-${tabName}`);
+      if (panel) panel.classList.add('active');
+
+      document.querySelectorAll(`[data-tab="${tabName}"]`).forEach(el => {
+        if (el.classList.contains('tab-btn') || el.classList.contains('bottom-nav-item')) {
+          el.classList.add('active');
+        }
+      });
+
+      if (tabName === 'charts') {
+        setTimeout(renderCharts, 50);
+      }
+    }
+
+    function updateUI() {
+      renderWeights();
+      renderMeasurements();
+      renderExercises();
+      renderOverview();
+      renderReminders();
+      renderDiet();
+      renderTodayOverview();
+      renderGoalInputs();
+      renderGoalProgress();
+    }
+
+    // ===========================
+    // Toast
+    // ===========================
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // ===========================
+    // Weight
+    // ===========================
+    function addWeight() {
+      const date = document.getElementById('weightDate').value;
+      const weight = parseFloat(document.getElementById('weightValue').value);
+      const fat = document.getElementById('weightFat').value;
+      const note = document.getElementById('weightNote').value.trim();
+
+      if (!date || isNaN(weight) || weight <= 0) {
+        showToast('请填写日期和有效体重');
+        return;
+      }
+
+      const existingIndex = appData.weights.findIndex(w => w.date === date);
+      const entry = { date, weight, fat: fat ? parseFloat(fat) : null, note };
+
+      if (existingIndex >= 0) {
+        appData.weights[existingIndex] = entry;
+      } else {
+        appData.weights.push(entry);
+      }
+
+      appData.weights.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+      saveData();
+      updateUI();
+      document.getElementById('weightValue').value = '';
+      document.getElementById('weightFat').value = '';
+      document.getElementById('weightNote').value = '';
+      showToast('体重记录已保存');
+    }
+
+    function deleteWeight(date) {
+      appData.weights = appData.weights.filter(w => w.date !== date);
+      saveData();
+      updateUI();
+      showToast('已删除');
+    }
+
+    function renderWeights() {
+      const tbody = document.getElementById('weightTableBody');
+      const empty = document.getElementById('weightEmpty');
+      tbody.innerHTML = '';
+
+      if (appData.weights.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      const reversed = [...appData.weights].reverse();
+      reversed.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${w.date}</td>
+          <td><strong>${w.weight.toFixed(1)}</strong></td>
+          <td>${w.fat !== null ? w.fat.toFixed(1) + '%' : '-'}</td>
+          <td>${w.note || '-'}</td>
+          <td><button class="delete-btn" onclick="deleteWeight('${w.date}')">删除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===========================
+    // Measurements
+    // ===========================
+    function addMeasurement() {
+      const date = document.getElementById('measureDate').value;
+      if (!date) {
+        showToast('请选择日期');
+        return;
+      }
+
+      const fields = {
+        chest: 'measureChest',
+        waist: 'measureWaist',
+        hip: 'measureHip',
+        upperArm: 'measureUpperArm',
+        forearm: 'measureForearm',
+        thigh: 'measureThigh',
+        calf: 'measureCalf'
+      };
+
+      const entry = { date };
+      let hasValue = false;
+      for (const key in fields) {
+        const val = parseFloat(document.getElementById(fields[key]).value);
+        if (!isNaN(val) && val > 0) {
+          entry[key] = val;
+          hasValue = true;
+        } else {
+          entry[key] = null;
+        }
+      }
+
+      if (!hasValue) {
+        showToast('请至少填写一项维度');
+        return;
+      }
+
+      const existingIndex = appData.measurements.findIndex(m => m.date === date);
+      if (existingIndex >= 0) {
+        appData.measurements[existingIndex] = entry;
+      } else {
+        appData.measurements.push(entry);
+      }
+
+      appData.measurements.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+      saveData();
+      updateUI();
+      clearMeasurementInputs();
+      showToast('维度记录已保存');
+    }
+
+    function clearMeasurementInputs() {
+      ['measureChest', 'measureWaist', 'measureHip', 'measureUpperArm', 'measureForearm', 'measureThigh', 'measureCalf'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+    }
+
+    function deleteMeasurement(date) {
+      appData.measurements = appData.measurements.filter(m => m.date !== date);
+      saveData();
+      updateUI();
+      showToast('已删除');
+    }
+
+    function renderMeasurements() {
+      const tbody = document.getElementById('measureTableBody');
+      const empty = document.getElementById('measureEmpty');
+      tbody.innerHTML = '';
+
+      if (appData.measurements.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      const reversed = [...appData.measurements].reverse();
+      reversed.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.date}</td>
+          <td>${m.chest ?? '-'}</td>
+          <td>${m.waist ?? '-'}</td>
+          <td>${m.hip ?? '-'}</td>
+          <td>${m.upperArm ?? '-'}</td>
+          <td>${m.forearm ?? '-'}</td>
+          <td>${m.thigh ?? '-'}</td>
+          <td>${m.calf ?? '-'}</td>
+          <td><button class="delete-btn" onclick="deleteMeasurement('${m.date}')">删除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===========================
+    // Exercise
+    // ===========================
+    const exerciseTypeMap = {
+      aerobic: '有氧',
+      strength: '力量',
+      flexibility: '柔韧'
+    };
+
+    function addExercise() {
+      const date = document.getElementById('exerciseDate').value;
+      const type = document.getElementById('exerciseType').value;
+      const name = document.getElementById('exerciseName').value.trim();
+      const duration = parseFloat(document.getElementById('exerciseDuration').value);
+      const calories = document.getElementById('exerciseCalories').value;
+
+      if (!date || !name || isNaN(duration) || duration <= 0) {
+        showToast('请填写日期、项目名称和有效时长');
+        return;
+      }
+
+      appData.exercises.push({
+        date,
+        type,
+        name,
+        duration,
+        calories: calories ? parseFloat(calories) : null
+      });
+
+      appData.exercises.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+      saveData();
+      updateUI();
+      document.getElementById('exerciseName').value = '';
+      document.getElementById('exerciseDuration').value = '';
+      document.getElementById('exerciseCalories').value = '';
+      showToast('运动记录已保存');
+    }
+
+    function deleteExercise(index) {
+      appData.exercises.splice(index, 1);
+      saveData();
+      updateUI();
+      showToast('已删除');
+    }
+
+    function renderExercises() {
+      const tbody = document.getElementById('exerciseTableBody');
+      const empty = document.getElementById('exerciseEmpty');
+      tbody.innerHTML = '';
+
+      if (appData.exercises.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      const reversed = [...appData.exercises].reverse();
+      reversed.forEach((ex, idx) => {
+        const originalIndex = appData.exercises.length - 1 - idx;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${ex.date}</td>
+          <td>${exerciseTypeMap[ex.type] || ex.type}</td>
+          <td>${ex.name}</td>
+          <td>${ex.duration} 分钟</td>
+          <td>${ex.calories !== null ? ex.calories + ' kcal' : '-'}</td>
+          <td><button class="delete-btn" onclick="deleteExercise(${originalIndex})">删除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===========================
+    // Overview
+    // ===========================
+    function renderOverview() {
+      const weights = appData.weights;
+      const current = weights.length > 0 ? weights[weights.length - 1].weight : null;
+      const start = appData.goals.startWeight;
+      const target = appData.goals.targetWeight;
+
+      document.getElementById('currentWeight').textContent = current !== null ? current.toFixed(1) : '--';
+
+      let loss = '--';
+      if (current !== null && start) {
+        loss = (start - current).toFixed(1);
+      }
+      document.getElementById('weightLoss').textContent = loss;
+
+      // Weekly exercise minutes (last 7 days including today)
+      const today = new Date();
+      let weeklyMinutes = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const str = formatDate(d);
+        weeklyMinutes += appData.exercises
+          .filter(ex => ex.date === str)
+          .reduce((sum, ex) => sum + ex.duration, 0);
+      }
+      document.getElementById('weeklyExercise').textContent = weeklyMinutes;
+
+      // Streak days: consecutive days with at least weight/exercise/diet/measurement recorded
+      let streak = 0;
+      const checkDate = new Date();
+      while (true) {
+        const str = formatDate(checkDate);
+        const hasActivity = appData.weights.some(w => w.date === str) ||
+                            appData.exercises.some(e => e.date === str) ||
+                            appData.measurements.some(m => m.date === str) ||
+                            (appData.dietLog[str] && (appData.dietLog[str].vegetables || appData.dietLog[str].protein));
+        if (hasActivity) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      document.getElementById('streakDays').textContent = streak;
+    }
+
+    // ===========================
+    // Reminders & Medicine
+    // ===========================
+    function renderReminders() {
+      document.getElementById('morningTime').textContent = appData.reminders.morning || '07:30';
+      document.getElementById('noonTime').textContent = appData.reminders.noon || '12:00';
+      document.getElementById('eveningTime').textContent = appData.reminders.evening || '18:00';
+      document.getElementById('morningEnabled').checked = appData.reminders.enabled !== false;
+      document.getElementById('noonEnabled').checked = appData.reminders.enabled !== false;
+      document.getElementById('eveningEnabled').checked = appData.reminders.enabled !== false;
+
+      updateMedicineButtons();
+    }
+
+    function updateReminderSettings() {
+      const morningEnabled = document.getElementById('morningEnabled').checked;
+      const noonEnabled = document.getElementById('noonEnabled').checked;
+      const eveningEnabled = document.getElementById('eveningEnabled').checked;
+      appData.reminders.enabled = morningEnabled || noonEnabled || eveningEnabled;
+      saveData();
+    }
+
+    function getTodayDietLog() {
+      const today = getTodayStr();
+      if (!appData.dietLog[today]) {
+        appData.dietLog[today] = {
+          vegetables: false,
+          protein: false,
+          medicine: { morning: false, noon: false, evening: false }
+        };
+      }
+      return appData.dietLog[today];
+    }
+
+    function takeMedicine(timeOfDay) {
+      const todayLog = getTodayDietLog();
+      todayLog.medicine[timeOfDay] = !todayLog.medicine[timeOfDay];
+      saveData();
+      updateMedicineButtons();
+      renderTodayOverview();
+
+      const label = timeOfDay === 'morning' ? '早上' : timeOfDay === 'noon' ? '中午' : '晚上';
+      showToast(todayLog.medicine[timeOfDay] ? `${label}药物已标记为已服用` : `${label}药物标记已取消`);
+
+      // Dismiss visual alert if it matches
+      const alertText = document.getElementById('visual-alert-text').textContent;
+      if (todayLog.medicine[timeOfDay] && alertText.includes(label)) {
+        dismissVisualAlert();
+      }
+    }
+
+    function updateMedicineButtons() {
+      const todayLog = getTodayDietLog();
+      ['morning', 'noon', 'evening'].forEach(time => {
+        const btn = document.getElementById(`${time}Btn`);
+        const taken = todayLog.medicine[time];
+        btn.textContent = taken ? '已服用 ✓' : '已服用';
+        btn.classList.toggle('taken', taken);
+      });
+    }
+
+    function startReminderLoop() {
+      if (reminderInterval) clearInterval(reminderInterval);
+      checkReminders();
+      reminderInterval = setInterval(checkReminders, 1000);
+    }
+
+    function checkReminders() {
+      if (!appData.reminders.enabled) return;
+
+      const now = new Date();
+      const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      const today = getTodayStr();
+      const todayLog = getTodayDietLog();
+
+      const periods = [
+        { key: 'morning', label: '早上', time: appData.reminders.morning || '07:30' },
+        { key: 'noon', label: '中午', time: appData.reminders.noon || '12:00' },
+        { key: 'evening', label: '晚上', time: appData.reminders.evening || '18:00' }
+      ];
+
+      periods.forEach(p => {
+        updateCountdown(p.key, p.time, now);
+
+        const triggerStr = `${p.time}:00`;
+        if (currentTimeStr === triggerStr) {
+          if (lastNotified[p.key] !== today) {
+            lastNotified[p.key] = today;
+            if (!todayLog.medicine[p.key]) {
+              showMedicineAlert(p.label, p.key);
+            }
+          }
+        }
+      });
+    }
+
+    function updateCountdown(key, timeStr, now) {
+      const [h, m] = timeStr.split(':').map(Number);
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+      if (target <= now) {
+        target.setDate(target.getDate() + 1);
+      }
+      const diffMs = target - now;
+      const diffH = Math.floor(diffMs / 3600000);
+      const diffM = Math.floor((diffMs % 3600000) / 60000);
+      const diffS = Math.floor((diffMs % 60000) / 1000);
+      document.getElementById(`${key}Countdown`).textContent = `还有 ${diffH}小时${diffM}分${diffS}秒`;
+    }
+
+    function showMedicineAlert(label, key) {
+      const card = document.getElementById(`${key}Card`);
+      card.classList.add('active-alert');
+
+      document.getElementById('visual-alert-text').textContent = `⏰ 到${label}吃药时间啦！`;
+      document.getElementById('visual-alert').classList.add('show');
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('减肥打卡工作台', {
+          body: `到${label}吃药时间啦，记得按时服药哦！`,
+          icon: '/icon-192.png',
+          badge: '/icon-192.png'
+        });
+      }
+    }
+
+    function dismissVisualAlert() {
+      document.getElementById('visual-alert').classList.remove('show');
+      ['morning', 'noon', 'evening'].forEach(key => {
+        document.getElementById(`${key}Card`).classList.remove('active-alert');
+      });
+    }
+
+    function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        showToast('当前浏览器不支持通知');
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          showToast('通知权限已开启');
+        } else {
+          showToast('通知权限被拒绝');
+        }
+      });
+    }
+
+    // ===========================
+    // Diet
+    // ===========================
+    function toggleDiet(type) {
+      const todayLog = getTodayDietLog();
+      todayLog[type] = !todayLog[type];
+      saveData();
+      renderDiet();
+      renderTodayOverview();
+      const label = type === 'vegetables' ? '蔬菜' : '蛋白质';
+      showToast(todayLog[type] ? `今日${label}已打卡` : `已取消今日${label}打卡`);
+    }
+
+    function renderDiet() {
+      const todayLog = getTodayDietLog();
+
+      const vegCard = document.getElementById('vegetableCard');
+      vegCard.classList.toggle('done', todayLog.vegetables);
+      document.getElementById('vegetableStatus').textContent = todayLog.vegetables ? '已完成 ✓' : '点击打卡';
+
+      const proteinCard = document.getElementById('proteinCard');
+      proteinCard.classList.toggle('done', todayLog.protein);
+      document.getElementById('proteinStatus').textContent = todayLog.protein ? '已完成 ✓' : '点击打卡';
+    }
+
+    function renderTodayOverview() {
+      const today = getTodayStr();
+      const todayLog = getTodayDietLog();
+
+      const medicineTaken = Object.values(todayLog.medicine).filter(Boolean).length;
+      document.getElementById('todayMedicine').textContent = `${medicineTaken}/3`;
+
+      const dietDone = (todayLog.vegetables ? 1 : 0) + (todayLog.protein ? 1 : 0);
+      document.getElementById('todayDiet').textContent = `${dietDone}/2`;
+
+      const exerciseMinutes = appData.exercises
+        .filter(e => e.date === today)
+        .reduce((sum, e) => sum + e.duration, 0);
+      document.getElementById('todayExerciseMinutes').textContent = exerciseMinutes;
+    }
+
+    // ===========================
+    // Goals
+    // ===========================
+    function saveGoals() {
+      const startWeight = parseFloat(document.getElementById('goalStartWeight').value);
+      const targetWeight = parseFloat(document.getElementById('goalTargetWeight').value);
+      const dailyExercise = parseFloat(document.getElementById('goalDailyExercise').value);
+      const goalWaist = parseFloat(document.getElementById('goalWaist').value);
+
+      if (isNaN(startWeight) || isNaN(targetWeight) || isNaN(dailyExercise) || isNaN(goalWaist)) {
+        showToast('请填写完整的目标');
+        return;
+      }
+
+      appData.goals = { startWeight, targetWeight, dailyExercise, goalWaist };
+      saveData();
+      updateUI();
+      showToast('目标已保存');
+    }
+
+    function renderGoalInputs() {
+      document.getElementById('goalStartWeight').value = appData.goals.startWeight || '';
+      document.getElementById('goalTargetWeight').value = appData.goals.targetWeight || '';
+      document.getElementById('goalDailyExercise').value = appData.goals.dailyExercise || '';
+      document.getElementById('goalWaist').value = appData.goals.goalWaist || '';
+    }
+
+    function renderGoalProgress() {
+      const { startWeight, targetWeight, dailyExercise, goalWaist } = appData.goals;
+      const currentWeight = appData.weights.length > 0 ? appData.weights[appData.weights.length - 1].weight : null;
+      const latestWaist = appData.measurements.length > 0
+        ? [...appData.measurements].sort((a, b) => parseDate(b.date) - parseDate(a.date))[0].waist
+        : null;
+      const todayMinutes = appData.exercises
+        .filter(e => e.date === getTodayStr())
+        .reduce((sum, e) => sum + e.duration, 0);
+
+      // Weight progress: start -> target, current in between
+      if (startWeight && targetWeight && currentWeight !== null) {
+        const total = startWeight - targetWeight;
+        const lost = startWeight - currentWeight;
+        let pct = total > 0 ? (lost / total) * 100 : 0;
+        pct = Math.max(0, Math.min(100, pct));
+        document.getElementById('weightProgressBar').style.width = `${pct}%`;
+        document.getElementById('weightProgressText').textContent = `${lost.toFixed(1)} / ${total.toFixed(1)} kg (${pct.toFixed(0)}%)`;
+      } else {
+        document.getElementById('weightProgressBar').style.width = '0%';
+        document.getElementById('weightProgressText').textContent = '--';
+      }
+
+      // Waist progress (current -> goal)
+      if (latestWaist && goalWaist) {
+        // Assume starting waist is the earliest recorded
+        const sorted = [...appData.measurements].filter(m => m.waist).sort((a, b) => parseDate(a.date) - parseDate(b.date));
+        const startWaist = sorted.length > 0 ? sorted[0].waist : latestWaist;
+        const total = startWaist - goalWaist;
+        const lost = startWaist - latestWaist;
+        let pct = total > 0 ? (lost / total) * 100 : 0;
+        pct = Math.max(0, Math.min(100, pct));
+        document.getElementById('waistProgressBar').style.width = `${pct}%`;
+        document.getElementById('waistProgressText').textContent = `${lost.toFixed(1)} / ${total.toFixed(1)} cm (${pct.toFixed(0)}%)`;
+      } else {
+        document.getElementById('waistProgressBar').style.width = '0%';
+        document.getElementById('waistProgressText').textContent = '--';
+      }
+
+      // Exercise progress
+      if (dailyExercise) {
+        const pct = Math.min(100, (todayMinutes / dailyExercise) * 100);
+        document.getElementById('exerciseProgressBar').style.width = `${pct}%`;
+        document.getElementById('exerciseProgressText').textContent = `${todayMinutes} / ${dailyExercise} 分钟`;
+      } else {
+        document.getElementById('exerciseProgressBar').style.width = '0%';
+        document.getElementById('exerciseProgressText').textContent = '--';
+      }
+    }
+
+    // ===========================
+    // Charts
+    // ===========================
+    function destroyChart(name) {
+      if (chartInstances[name]) {
+        chartInstances[name].destroy();
+        delete chartInstances[name];
+      }
+    }
+
+    function renderCharts() {
+      renderWeightChart();
+      renderMeasurementChart();
+      renderExerciseDurationChart();
+      renderCaloriesChart();
+      renderExerciseTypeChart();
+    }
+
+    function renderWeightChart() {
+      destroyChart('weight');
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      const labels = appData.weights.map(w => w.date);
+      const data = appData.weights.map(w => w.weight);
+
+      chartInstances.weight = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '体重 (kg)',
+            data,
+            borderColor: '#ff6b6b',
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#ff6b6b',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: false, grid: { color: '#f0f0f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderMeasurementChart() {
+      destroyChart('measurement');
+      const ctx = document.getElementById('measurementChart').getContext('2d');
+      const labels = appData.measurements.map(m => m.date);
+
+      const datasets = [
+        { label: '胸围', key: 'chest', color: '#ff6b6b' },
+        { label: '腰围', key: 'waist', color: '#4ecdc4' },
+        { label: '臀围', key: 'hip', color: '#45b7d1' },
+        { label: '大臂', key: 'upperArm', color: '#f9ca24' },
+        { label: '小臂', key: 'forearm', color: '#6c5ce7' },
+        { label: '大腿', key: 'thigh', color: '#a29bfe' },
+        { label: '小腿', key: 'calf', color: '#fd79a8' }
+      ].map(ds => ({
+        label: ds.label,
+        data: appData.measurements.map(m => m[ds.key]),
+        borderColor: ds.color,
+        backgroundColor: ds.color,
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 3
+      }));
+
+      chartInstances.measurement = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: false, grid: { color: '#f0f0f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderExerciseDurationChart() {
+      destroyChart('exerciseDuration');
+      const ctx = document.getElementById('exerciseDurationChart').getContext('2d');
+      const grouped = {};
+      appData.exercises.forEach(ex => {
+        grouped[ex.date] = (grouped[ex.date] || 0) + ex.duration;
+      });
+      const labels = Object.keys(grouped).sort();
+      const data = labels.map(d => grouped[d]);
+
+      chartInstances.exerciseDuration = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: '运动时长 (分钟)',
+            data,
+            backgroundColor: '#4ecdc4',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderCaloriesChart() {
+      destroyChart('calories');
+      const ctx = document.getElementById('caloriesChart').getContext('2d');
+      const grouped = {};
+      appData.exercises.forEach(ex => {
+        if (ex.calories) {
+          grouped[ex.date] = (grouped[ex.date] || 0) + ex.calories;
+        }
+      });
+      const labels = Object.keys(grouped).sort();
+      const data = labels.map(d => grouped[d]);
+
+      chartInstances.calories = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: '热量 (kcal)',
+            data,
+            backgroundColor: '#ff6b6b',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderExerciseTypeChart() {
+      destroyChart('exerciseType');
+      const ctx = document.getElementById('exerciseTypeChart').getContext('2d');
+      const counts = { aerobic: 0, strength: 0, flexibility: 0 };
+      appData.exercises.forEach(ex => {
+        if (counts[ex.type] !== undefined) counts[ex.type]++;
+      });
+
+      chartInstances.exerciseType = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['有氧', '力量', '柔韧'],
+          datasets: [{
+            data: [counts.aerobic, counts.strength, counts.flexibility],
+            backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%'
+        }
+      });
+    }
+
+    // ===========================
+    // Export / Import
+    // ===========================
+    function exportData() {
+      const dataStr = JSON.stringify(appData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `减肥打卡备份_${getTodayStr()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('备份已导出');
+    }
+
+    function importData(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          appData = deepMerge(JSON.parse(JSON.stringify(defaultData)), imported);
+          saveData();
+          updateUI();
+          showToast('备份已导入');
+        } catch (err) {
+          showToast('导入失败，文件格式错误');
+          console.error(err);
+        }
+      };
+      reader.readAsText(file);
+      input.value = '';
+    }
+
+    function confirmClearData() {
+      document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').classList.remove('show');
+    }
+
+    function clearAllData() {
+      appData = JSON.parse(JSON.stringify(defaultData));
+      saveData();
+      updateUI();
+      closeModal();
+      showToast('所有数据已清空');
+    }
+
+    // Close modal on overlay click
+    document.getElementById('confirmModal').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmModal') closeModal();
+    });
+  </script>
+</body>
+</html>
