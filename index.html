@@ -26,7 +26,9 @@
       --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
       --radius: 18px;
       --radius-sm: 12px;
-      --header-height: 56px;
+      --header-height: 52px;
+      --sidebar-width: 72px;
+      --sidebar-width-desktop: 90px;
     }
 
     * {
@@ -41,91 +43,161 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      overflow: hidden;
+      height: 100%;
     }
 
-    body {
-      padding-bottom: 90px;
+    /* ========== APP SHELL ========== */
+    .app-shell {
+      display: flex;
+      height: 100vh;
+      height: 100dvh;
     }
 
-    /* Header */
+    /* ========== HEADER ========== */
     .app-header {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      right: 0;
+      z-index: 200;
       background: linear-gradient(135deg, var(--coral) 0%, var(--mint) 100%);
       color: white;
       height: var(--header-height);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
+      padding: 0 14px;
       box-shadow: 0 2px 15px rgba(255, 107, 107, 0.25);
     }
 
     .app-header h1 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       margin: 0;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .header-actions {
       display: flex;
-      gap: 8px;
+      gap: 4px;
     }
 
     .header-actions button {
       background: rgba(255, 255, 255, 0.2);
       border: none;
       color: white;
-      padding: 6px 10px;
+      padding: 6px 8px;
       border-radius: var(--radius-sm);
       font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .header-actions button:hover {
       background: rgba(255, 255, 255, 0.35);
     }
 
-    /* Container */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: white;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 0;
+      box-shadow: 2px 0 20px rgba(0, 0, 0, 0.04);
+      overflow-y: auto;
     }
 
-    /* Date strip */
+    .sidebar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      color: var(--text-light);
+      font-size: 11px;
+      font-weight: 600;
+      gap: 5px;
+      position: relative;
+      user-select: none;
+    }
+
+    .sidebar-item:hover {
+      color: var(--coral);
+      background: #fff5f5;
+    }
+
+    .sidebar-item.active {
+      color: var(--coral);
+      border-left-color: var(--coral);
+      background: linear-gradient(90deg, rgba(255,107,107,0.08) 0%, transparent 100%);
+    }
+
+    .sidebar-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      margin-top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+      height: calc(100dvh - var(--header-height));
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px 14px 24px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ========== DATE STRIP ========== */
     .date-strip {
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       color: var(--text-light);
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .date-strip .today {
       color: var(--coral);
       font-weight: 700;
       background: #fff0f0;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 20px;
       display: inline-block;
-      margin-left: 8px;
+      margin-left: 6px;
     }
 
-    /* Overview cards */
+    /* ========== OVERVIEW CARDS ========== */
     .overview-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
     .overview-card {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 16px;
+      padding: 14px 12px;
       box-shadow: var(--shadow);
       text-align: center;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -137,89 +209,46 @@
     }
 
     .overview-card .value {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       color: var(--coral);
       line-height: 1.2;
     }
 
     .overview-card .label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-light);
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
-    /* Tabs */
-    .tab-bar {
-      position: sticky;
-      top: var(--header-height);
-      z-index: 99;
-      background: var(--bg);
-      padding: 10px 0;
-      margin: 0 -16px 16px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-list {
-      display: flex;
-      gap: 8px;
-      padding: 0 16px;
-      min-width: max-content;
-    }
-
-    .tab-btn {
-      flex: 0 0 auto;
-      padding: 8px 16px;
-      border: none;
-      background: white;
-      color: var(--text-light);
-      border-radius: 24px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      transition: all 0.2s;
-    }
-
-    .tab-btn.active {
-      background: var(--coral);
-      color: white;
-    }
-
-    .tab-btn:hover:not(.active) {
-      background: white;
-      color: var(--coral);
-    }
-
-    /* Tab panels */
+    /* ========== TAB PANELS ========== */
     .tab-panel {
       display: none;
     }
 
     .tab-panel.active {
       display: block;
-      animation: fadeIn 0.25s ease;
+      animation: fadeIn 0.3s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Cards */
+    /* ========== CARDS ========== */
     .card {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 18px;
-      margin-bottom: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
       box-shadow: var(--shadow);
     }
 
     .card-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
-      margin: 0 0 14px 0;
+      margin: 0 0 12px 0;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -234,14 +263,14 @@
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 12px;
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .form-group.full-width {
@@ -255,10 +284,10 @@
     }
 
     input, select, textarea {
-      padding: 12px;
+      padding: 11px 12px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      font-size: 15px;
+      font-size: 14px;
       background: #fafbfc;
       transition: border-color 0.2s;
       width: 100%;
@@ -272,14 +301,14 @@
 
     textarea {
       resize: vertical;
-      min-height: 70px;
+      min-height: 60px;
     }
 
     .btn {
-      padding: 12px 20px;
+      padding: 11px 18px;
       border: none;
       border-radius: var(--radius-sm);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
@@ -328,14 +357,14 @@
     .form-actions {
       display: flex;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 12px;
       flex-wrap: wrap;
     }
 
-    /* Tables */
+    /* ========== TABLES ========== */
     .data-table-wrapper {
       overflow-x: auto;
-      margin-top: 12px;
+      margin-top: 10px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
     }
@@ -343,12 +372,12 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12px;
       background: white;
     }
 
     th, td {
-      padding: 10px 12px;
+      padding: 8px 10px;
       text-align: left;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
@@ -358,8 +387,7 @@
       background: #f8f9fa;
       font-weight: 700;
       color: var(--text-light);
-      font-size: 12px;
-      text-transform: uppercase;
+      font-size: 11px;
     }
 
     tr:last-child td {
@@ -370,9 +398,9 @@
       background: #fff0f0;
       color: var(--coral);
       border: none;
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: 8px;
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
     }
 
@@ -381,18 +409,18 @@
       color: white;
     }
 
-    /* Reminder cards */
+    /* ========== REMINDER CARDS ========== */
     .reminder-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .reminder-card {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 16px;
+      padding: 14px 10px;
       box-shadow: var(--shadow);
       text-align: center;
       border: 2px solid transparent;
@@ -412,39 +440,39 @@
     }
 
     .reminder-card h3 {
-      margin: 0 0 6px 0;
-      font-size: 15px;
+      margin: 0 0 4px 0;
+      font-size: 13px;
       color: var(--text);
     }
 
     .reminder-time {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--coral);
     }
 
     .countdown {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-light);
-      margin: 8px 0;
-      height: 18px;
+      margin: 6px 0;
+      min-height: 16px;
     }
 
     .reminder-toggle {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin: 10px 0;
-      font-size: 13px;
+      gap: 6px;
+      margin: 8px 0;
+      font-size: 11px;
       color: var(--text-light);
     }
 
     .switch {
       position: relative;
       display: inline-block;
-      width: 46px;
-      height: 24px;
+      width: 40px;
+      height: 22px;
     }
 
     .switch input {
@@ -462,14 +490,14 @@
       bottom: 0;
       background-color: #ccc;
       transition: .3s;
-      border-radius: 24px;
+      border-radius: 22px;
     }
 
     .slider:before {
       position: absolute;
       content: "";
-      height: 18px;
-      width: 18px;
+      height: 16px;
+      width: 16px;
       left: 3px;
       bottom: 3px;
       background-color: white;
@@ -482,30 +510,32 @@
     }
 
     input:checked + .slider:before {
-      transform: translateX(22px);
+      transform: translateX(18px);
     }
 
     .check-btn {
       width: 100%;
-      margin-top: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+      padding: 8px;
     }
 
     .check-btn.taken {
       background: var(--mint);
     }
 
-    /* Diet cards */
+    /* ========== DIET CARDS ========== */
     .diet-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .diet-card {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 16px;
       box-shadow: var(--shadow);
       text-align: center;
       cursor: pointer;
@@ -525,35 +555,35 @@
     }
 
     .diet-icon {
-      font-size: 36px;
-      margin-bottom: 8px;
+      font-size: 32px;
+      margin-bottom: 6px;
     }
 
     .diet-name {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
     }
 
     .diet-status {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-light);
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
-    /* Progress bars */
+    /* ========== PROGRESS BARS ========== */
     .progress-section {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .progress-header {
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 6px;
+      font-size: 12px;
+      margin-bottom: 5px;
     }
 
     .progress-bar {
-      height: 12px;
+      height: 10px;
       background: #e9ecef;
       border-radius: 10px;
       overflow: hidden;
@@ -566,36 +596,30 @@
       transition: width 0.5s ease;
     }
 
-    /* Chart containers */
+    /* ========== CHARTS ========== */
     .chart-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    @media (min-width: 900px) {
-      .chart-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      gap: 14px;
     }
 
     .chart-container {
       position: relative;
-      height: 300px;
-      margin-top: 10px;
+      height: 260px;
+      margin-top: 8px;
     }
 
-    /* Goals */
+    /* ========== GOALS ========== */
     .goal-inputs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
 
-    /* Toast */
+    /* ========== TOAST ========== */
     #toast {
       position: fixed;
-      bottom: 90px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(120%);
       background: #2c3e50;
@@ -606,7 +630,7 @@
       z-index: 1000;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
       transition: transform 0.3s ease;
-      max-width: 90vw;
+      max-width: 85vw;
       text-align: center;
     }
 
@@ -614,56 +638,15 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Bottom nav */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
-      box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.06);
-      z-index: 100;
-    }
-
-    .bottom-nav-item {
-      flex: 1;
-      text-align: center;
-      color: var(--text-light);
-      font-size: 11px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .bottom-nav-item.active {
-      color: var(--coral);
-    }
-
-    .bottom-nav-icon {
-      font-size: 22px;
-      line-height: 1;
-      margin-bottom: 2px;
-    }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 30px 20px;
-      color: var(--text-light);
-      font-size: 14px;
-    }
-
-    /* Visual alert overlay */
+    /* ========== VISUAL ALERT ========== */
     #visual-alert {
       position: fixed;
       top: var(--header-height);
-      left: 0;
+      left: var(--sidebar-width);
       right: 0;
       background: linear-gradient(90deg, var(--coral), #ff8f8f);
       color: white;
-      padding: 14px 16px;
+      padding: 12px 14px;
       z-index: 98;
       display: none;
       align-items: center;
@@ -683,20 +666,20 @@
 
     .visual-alert-text {
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .visual-alert-close {
       background: rgba(255, 255, 255, 0.25);
       border: none;
       color: white;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 20px;
       cursor: pointer;
       font-size: 12px;
     }
 
-    /* Modal */
+    /* ========== MODAL ========== */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -720,21 +703,21 @@
       border-radius: var(--radius);
       padding: 20px;
       width: 100%;
-      max-width: 420px;
+      max-width: 400px;
       max-height: 80vh;
       overflow-y: auto;
     }
 
     .modal-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .modal-text {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-light);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       line-height: 1.6;
     }
 
@@ -748,9 +731,22 @@
       display: none;
     }
 
-    /* Responsive improvements */
-    @media (min-width: 768px) {
-      .form-grid.two-col {
+    /* ========== EMPTY STATE ========== */
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-light);
+      font-size: 13px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (min-width: 480px) {
+      .form-grid.two-col,
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .goal-inputs {
         grid-template-columns: repeat(2, 1fr);
       }
 
@@ -759,448 +755,493 @@
       }
     }
 
-    @media (max-width: 480px) {
+    @media (min-width: 768px) {
+      :root {
+        --sidebar-width: var(--sidebar-width-desktop);
+      }
+
+      .main-content {
+        padding: 20px 24px 32px;
+      }
+
+      .sidebar-item {
+        padding: 16px 8px;
+      }
+
+      .sidebar-icon {
+        font-size: 26px;
+      }
+
+      .sidebar-label {
+        font-size: 12px;
+      }
+
+      .app-header h1 {
+        font-size: 18px;
+      }
+
+      .header-actions button {
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+
+      .chart-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .reminder-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .main-content {
+        max-width: 960px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: calc(var(--sidebar-width) + 32px);
+        padding-right: 32px;
+      }
+    }
+
+    @media (max-width: 400px) {
       .header-actions button span {
         display: none;
       }
 
       .header-actions button {
-        padding: 6px;
+        padding: 5px 7px;
+        font-size: 14px;
       }
     }
   </style>
 </head>
 <body>
-  <header class="app-header">
-    <h1>减肥打卡工作台</h1>
-    <div class="header-actions">
-      <button onclick="exportData()" title="导出备份"><span>导出</span> 💾</button>
-      <button onclick="document.getElementById('importFile').click()" title="导入备份"><span>导入</span> 📂</button>
-      <button onclick="confirmClearData()" title="清空数据"><span>清空</span> 🗑️</button>
-      <button onclick="requestNotificationPermission()" title="开启通知">🔔</button>
-    </div>
-    <input type="file" id="importFile" class="hidden-file-input" accept=".json" onchange="importData(this)">
-  </header>
-
-  <div id="visual-alert">
-    <div class="visual-alert-text" id="visual-alert-text">⏰ 到点吃药啦！</div>
-    <button class="visual-alert-close" onclick="dismissVisualAlert()">已服用</button>
-  </div>
-
-  <main class="container">
-    <div class="date-strip">
-      今天是 <span class="today" id="todayDate"></span>
-    </div>
-
-    <section class="overview-grid">
-      <div class="overview-card">
-        <div class="value" id="currentWeight">--</div>
-        <div class="label">当前体重 (kg)</div>
+  <div class="app-shell">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>减肥打卡工作台</h1>
+      <div class="header-actions">
+        <button onclick="exportData()" title="导出备份"><span>导出</span> 💾</button>
+        <button onclick="document.getElementById('importFile').click()" title="导入备份"><span>导入</span> 📂</button>
+        <button onclick="confirmClearData()" title="清空数据"><span>清空</span> 🗑️</button>
+        <button onclick="requestNotificationPermission()" title="开启通知">🔔</button>
       </div>
-      <div class="overview-card">
-        <div class="value" id="weightLoss">--</div>
-        <div class="label">累计减重 (kg)</div>
-      </div>
-      <div class="overview-card">
-        <div class="value" id="weeklyExercise">--</div>
-        <div class="label">本周运动 (分钟)</div>
-      </div>
-      <div class="overview-card">
-        <div class="value" id="streakDays">--</div>
-        <div class="label">连续打卡 (天)</div>
-      </div>
-    </section>
+      <input type="file" id="importFile" class="hidden-file-input" accept=".json" onchange="importData(this)">
+    </header>
 
-    <nav class="tab-bar">
-      <div class="tab-list">
-        <button class="tab-btn active" data-tab="weight">体重</button>
-        <button class="tab-btn" data-tab="measurements">维度</button>
-        <button class="tab-btn" data-tab="exercise">运动</button>
-        <button class="tab-btn" data-tab="reminders">提醒</button>
-        <button class="tab-btn" data-tab="charts">图表</button>
-        <button class="tab-btn" data-tab="goals">目标</button>
+    <!-- Left Sidebar Navigation -->
+    <nav class="sidebar">
+      <div class="sidebar-item active" data-tab="weight" onclick="switchTab('weight')">
+        <span class="sidebar-icon">⚖️</span>
+        <span class="sidebar-label">体重</span>
+      </div>
+      <div class="sidebar-item" data-tab="measurements" onclick="switchTab('measurements')">
+        <span class="sidebar-icon">📏</span>
+        <span class="sidebar-label">维度</span>
+      </div>
+      <div class="sidebar-item" data-tab="exercise" onclick="switchTab('exercise')">
+        <span class="sidebar-icon">🏃</span>
+        <span class="sidebar-label">运动</span>
+      </div>
+      <div class="sidebar-item" data-tab="reminders" onclick="switchTab('reminders')">
+        <span class="sidebar-icon">💊</span>
+        <span class="sidebar-label">打卡</span>
+      </div>
+      <div class="sidebar-item" data-tab="charts" onclick="switchTab('charts')">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label">图表</span>
+      </div>
+      <div class="sidebar-item" data-tab="goals" onclick="switchTab('goals')">
+        <span class="sidebar-icon">🎯</span>
+        <span class="sidebar-label">目标</span>
       </div>
     </nav>
 
-    <!-- 体重记录 -->
-    <section class="tab-panel active" id="tab-weight">
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>记录今日体重</h2>
-        <div class="form-grid two-col">
-          <div class="form-group">
-            <label>日期</label>
-            <input type="date" id="weightDate">
-          </div>
-          <div class="form-group">
-            <label>体重 (kg)</label>
-            <input type="number" id="weightValue" step="0.1" placeholder="例如 65.5">
-          </div>
-          <div class="form-group">
-            <label>体脂率 (%)</label>
-            <input type="number" id="weightFat" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group full-width">
-            <label>备注</label>
-            <textarea id="weightNote" placeholder="今天感觉如何？"></textarea>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addWeight()">保存体重记录</button>
-        </div>
+    <div id="visual-alert">
+      <div class="visual-alert-text" id="visual-alert-text">⏰ 到点吃药啦！</div>
+      <button class="visual-alert-close" onclick="dismissVisualAlert()">已服用</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="date-strip">
+        今天是 <span class="today" id="todayDate"></span>
       </div>
 
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>体重历史</h2>
-        <div class="data-table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>日期</th>
-                <th>体重</th>
-                <th>体脂率</th>
-                <th>备注</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="weightTableBody"></tbody>
-          </table>
+      <section class="overview-grid">
+        <div class="overview-card">
+          <div class="value" id="currentWeight">--</div>
+          <div class="label">当前体重 (kg)</div>
         </div>
-        <div class="empty-state" id="weightEmpty" style="display:none">还没有体重记录，快去记录第一条吧！</div>
-      </div>
-    </section>
+        <div class="overview-card">
+          <div class="value" id="weightLoss">--</div>
+          <div class="label">累计减重 (kg)</div>
+        </div>
+        <div class="overview-card">
+          <div class="value" id="weeklyExercise">--</div>
+          <div class="label">本周运动 (分钟)</div>
+        </div>
+        <div class="overview-card">
+          <div class="value" id="streakDays">--</div>
+          <div class="label">连续打卡 (天)</div>
+        </div>
+      </section>
 
-    <!-- 身体维度 -->
-    <section class="tab-panel" id="tab-measurements">
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>记录身体维度</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>日期</label>
-            <input type="date" id="measureDate">
-          </div>
-          <div class="form-group">
-            <label>胸围 (cm)</label>
-            <input type="number" id="measureChest" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group">
-            <label>腰围 (cm)</label>
-            <input type="number" id="measureWaist" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group">
-            <label>臀围 (cm)</label>
-            <input type="number" id="measureHip" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group">
-            <label>大臂 (cm)</label>
-            <input type="number" id="measureUpperArm" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group">
-            <label>小臂 (cm)</label>
-            <input type="number" id="measureForearm" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group">
-            <label>大腿 (cm)</label>
-            <input type="number" id="measureThigh" step="0.1" placeholder="可选">
-          </div>
-          <div class="form-group">
-            <label>小腿 (cm)</label>
-            <input type="number" id="measureCalf" step="0.1" placeholder="可选">
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addMeasurement()">保存维度记录</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>维度历史</h2>
-        <div class="data-table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>日期</th>
-                <th>胸围</th>
-                <th>腰围</th>
-                <th>臀围</th>
-                <th>大臂</th>
-                <th>小臂</th>
-                <th>大腿</th>
-                <th>小腿</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="measureTableBody"></tbody>
-          </table>
-        </div>
-        <div class="empty-state" id="measureEmpty" style="display:none">还没有维度记录。</div>
-      </div>
-    </section>
-
-    <!-- 运动记录 -->
-    <section class="tab-panel" id="tab-exercise">
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>记录今日运动</h2>
-        <div class="form-grid two-col">
-          <div class="form-group">
-            <label>日期</label>
-            <input type="date" id="exerciseDate">
-          </div>
-          <div class="form-group">
-            <label>运动类型</label>
-            <select id="exerciseType">
-              <option value="aerobic">有氧运动</option>
-              <option value="strength">力量训练</option>
-              <option value="flexibility">柔韧性</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>项目名称</label>
-            <input type="text" id="exerciseName" placeholder="例如 跑步、瑜伽">
-          </div>
-          <div class="form-group">
-            <label>时长 (分钟)</label>
-            <input type="number" id="exerciseDuration" step="1" placeholder="30">
-          </div>
-          <div class="form-group">
-            <label>消耗热量 (kcal)</label>
-            <input type="number" id="exerciseCalories" step="1" placeholder="可选">
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addExercise()">保存运动记录</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>运动历史</h2>
-        <div class="data-table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>日期</th>
-                <th>类型</th>
-                <th>项目</th>
-                <th>时长</th>
-                <th>热量</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="exerciseTableBody"></tbody>
-          </table>
-        </div>
-        <div class="empty-state" id="exerciseEmpty" style="display:none">还没有运动记录，动起来！</div>
-      </div>
-    </section>
-
-    <!-- 提醒打卡 -->
-    <section class="tab-panel" id="tab-reminders">
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>吃药提醒</h2>
-        <div class="reminder-grid">
-          <div class="reminder-card" id="morningCard">
-            <h3>早上</h3>
-            <div class="reminder-time" id="morningTime">07:30</div>
-            <div class="countdown" id="morningCountdown">--</div>
-            <div class="reminder-toggle">
-              <span>启用</span>
-              <label class="switch">
-                <input type="checkbox" id="morningEnabled" checked onchange="updateReminderSettings()">
-                <span class="slider"></span>
-              </label>
-            </div>
-            <button class="btn btn-mint check-btn" id="morningBtn" onclick="takeMedicine('morning')">已服用</button>
-          </div>
-          <div class="reminder-card" id="noonCard">
-            <h3>中午</h3>
-            <div class="reminder-time" id="noonTime">12:00</div>
-            <div class="countdown" id="noonCountdown">--</div>
-            <div class="reminder-toggle">
-              <span>启用</span>
-              <label class="switch">
-                <input type="checkbox" id="noonEnabled" checked onchange="updateReminderSettings()">
-                <span class="slider"></span>
-              </label>
-            </div>
-            <button class="btn btn-mint check-btn" id="noonBtn" onclick="takeMedicine('noon')">已服用</button>
-          </div>
-          <div class="reminder-card" id="eveningCard">
-            <h3>晚上</h3>
-            <div class="reminder-time" id="eveningTime">18:00</div>
-            <div class="countdown" id="eveningCountdown">--</div>
-            <div class="reminder-toggle">
-              <span>启用</span>
-              <label class="switch">
-                <input type="checkbox" id="eveningEnabled" checked onchange="updateReminderSettings()">
-                <span class="slider"></span>
-              </label>
-            </div>
-            <button class="btn btn-mint check-btn" id="eveningBtn" onclick="takeMedicine('evening')">已服用</button>
-          </div>
-        </div>
-        <div class="modal-text" style="margin-bottom:0">
-          💡 提示：PWA 页面需要保持在前台才能正常弹出提醒。建议配合手机系统闹钟使用，或点击右上角铃铛开启浏览器通知权限。
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>饮食打卡</h2>
-        <div class="diet-grid">
-          <div class="diet-card" id="vegetableCard" onclick="toggleDiet('vegetables')">
-            <div class="diet-icon">🥬</div>
-            <div class="diet-name">吃蔬菜</div>
-            <div class="diet-status" id="vegetableStatus">未完成</div>
-          </div>
-          <div class="diet-card" id="proteinCard" onclick="toggleDiet('protein')">
-            <div class="diet-icon">🥚</div>
-            <div class="diet-name">吃蛋白质</div>
-            <div class="diet-status" id="proteinStatus">未完成</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>今日总览</h2>
-        <div class="form-grid">
-          <div class="overview-card">
-            <div class="value" id="todayMedicine">0/3</div>
-            <div class="label">今日已服药</div>
-          </div>
-          <div class="overview-card">
-            <div class="value" id="todayDiet">0/2</div>
-            <div class="label">今日饮食打卡</div>
-          </div>
-          <div class="overview-card">
-            <div class="value" id="todayExerciseMinutes">0</div>
-            <div class="label">今日运动 (分钟)</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 数据图表 -->
-    <section class="tab-panel" id="tab-charts">
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>体重趋势</h2>
-        <div class="chart-container">
-          <canvas id="weightChart"></canvas>
-        </div>
-      </div>
-      <div class="chart-grid">
+      <!-- 体重记录 -->
+      <section class="tab-panel active" id="tab-weight">
         <div class="card">
-          <h2 class="card-title"><span class="dot"></span>维度变化</h2>
-          <div class="chart-container">
-            <canvas id="measurementChart"></canvas>
+          <h2 class="card-title"><span class="dot"></span>记录今日体重</h2>
+          <div class="form-grid two-col">
+            <div class="form-group">
+              <label>日期</label>
+              <input type="date" id="weightDate">
+            </div>
+            <div class="form-group">
+              <label>体重 (kg)</label>
+              <input type="number" id="weightValue" step="0.1" placeholder="例如 65.5">
+            </div>
+            <div class="form-group">
+              <label>体脂率 (%)</label>
+              <input type="number" id="weightFat" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group full-width">
+              <label>备注</label>
+              <textarea id="weightNote" placeholder="今天感觉如何？"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addWeight()">保存体重记录</button>
           </div>
         </div>
-        <div class="card">
-          <h2 class="card-title"><span class="dot"></span>运动时长</h2>
-          <div class="chart-container">
-            <canvas id="exerciseDurationChart"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <h2 class="card-title"><span class="dot"></span>热量消耗</h2>
-          <div class="chart-container">
-            <canvas id="caloriesChart"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <h2 class="card-title"><span class="dot"></span>运动类型分布</h2>
-          <div class="chart-container">
-            <canvas id="exerciseTypeChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- 目标设置 -->
-    <section class="tab-panel" id="tab-goals">
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>我的目标</h2>
-        <div class="goal-inputs">
-          <div class="form-group">
-            <label>起始体重 (kg)</label>
-            <input type="number" id="goalStartWeight" step="0.1" placeholder="例如 70">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>体重历史</h2>
+          <div class="data-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>体重</th>
+                  <th>体脂率</th>
+                  <th>备注</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="weightTableBody"></tbody>
+            </table>
           </div>
-          <div class="form-group">
-            <label>目标体重 (kg)</label>
-            <input type="number" id="goalTargetWeight" step="0.1" placeholder="例如 60">
-          </div>
-          <div class="form-group">
-            <label>每日运动目标 (分钟)</label>
-            <input type="number" id="goalDailyExercise" step="1" placeholder="例如 30">
-          </div>
-          <div class="form-group">
-            <label>目标腰围 (cm)</label>
-            <input type="number" id="goalWaist" step="0.1" placeholder="例如 70">
-          </div>
+          <div class="empty-state" id="weightEmpty" style="display:none">还没有体重记录，快去记录第一条吧！</div>
         </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="saveGoals()">保存目标</button>
-        </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <h2 class="card-title"><span class="dot"></span>目标进度</h2>
-        <div id="goalProgressContainer">
-          <div class="progress-section">
-            <div class="progress-header">
-              <span>体重进度</span>
-              <span id="weightProgressText">--</span>
+      <!-- 身体维度 -->
+      <section class="tab-panel" id="tab-measurements">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>记录身体维度</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>日期</label>
+              <input type="date" id="measureDate">
             </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="weightProgressBar" style="width: 0%"></div>
+            <div class="form-group">
+              <label>胸围 (cm)</label>
+              <input type="number" id="measureChest" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group">
+              <label>腰围 (cm)</label>
+              <input type="number" id="measureWaist" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group">
+              <label>臀围 (cm)</label>
+              <input type="number" id="measureHip" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group">
+              <label>大臂 (cm)</label>
+              <input type="number" id="measureUpperArm" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group">
+              <label>小臂 (cm)</label>
+              <input type="number" id="measureForearm" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group">
+              <label>大腿 (cm)</label>
+              <input type="number" id="measureThigh" step="0.1" placeholder="可选">
+            </div>
+            <div class="form-group">
+              <label>小腿 (cm)</label>
+              <input type="number" id="measureCalf" step="0.1" placeholder="可选">
             </div>
           </div>
-          <div class="progress-section">
-            <div class="progress-header">
-              <span>腰围进度</span>
-              <span id="waistProgressText">--</span>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addMeasurement()">保存维度记录</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>维度历史</h2>
+          <div class="data-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>胸围</th>
+                  <th>腰围</th>
+                  <th>臀围</th>
+                  <th>大臂</th>
+                  <th>小臂</th>
+                  <th>大腿</th>
+                  <th>小腿</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="measureTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="measureEmpty" style="display:none">还没有维度记录。</div>
+        </div>
+      </section>
+
+      <!-- 运动记录 -->
+      <section class="tab-panel" id="tab-exercise">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>记录今日运动</h2>
+          <div class="form-grid two-col">
+            <div class="form-group">
+              <label>日期</label>
+              <input type="date" id="exerciseDate">
             </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="waistProgressBar" style="width: 0%"></div>
+            <div class="form-group">
+              <label>运动类型</label>
+              <select id="exerciseType">
+                <option value="legs">🦵 练腿</option>
+                <option value="abs">💪 练腹</option>
+                <option value="arms">🙋 练手臂</option>
+                <option value="none">🚫 不运动</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>项目名称</label>
+              <input type="text" id="exerciseName" placeholder="例如 深蹲、卷腹、哑铃弯举">
+            </div>
+            <div class="form-group">
+              <label>时长 (分钟)</label>
+              <input type="number" id="exerciseDuration" step="1" placeholder="30">
+            </div>
+            <div class="form-group">
+              <label>消耗热量 (kcal)</label>
+              <input type="number" id="exerciseCalories" step="1" placeholder="可选">
             </div>
           </div>
-          <div class="progress-section">
-            <div class="progress-header">
-              <span>今日运动</span>
-              <span id="exerciseProgressText">--</span>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addExercise()">保存运动记录</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>运动历史</h2>
+          <div class="data-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>类型</th>
+                  <th>项目</th>
+                  <th>时长</th>
+                  <th>热量</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="exerciseTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="exerciseEmpty" style="display:none">还没有运动记录，动起来！</div>
+        </div>
+      </section>
+
+      <!-- 提醒打卡 -->
+      <section class="tab-panel" id="tab-reminders">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>吃药提醒</h2>
+          <div class="reminder-grid">
+            <div class="reminder-card" id="morningCard">
+              <h3>早上</h3>
+              <div class="reminder-time" id="morningTime">07:30</div>
+              <div class="countdown" id="morningCountdown">--</div>
+              <div class="reminder-toggle">
+                <span>启用</span>
+                <label class="switch">
+                  <input type="checkbox" id="morningEnabled" checked onchange="updateReminderSettings()">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-mint check-btn" id="morningBtn" onclick="takeMedicine('morning')">已服用</button>
             </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="exerciseProgressBar" style="width: 0%"></div>
+            <div class="reminder-card" id="noonCard">
+              <h3>中午</h3>
+              <div class="reminder-time" id="noonTime">12:00</div>
+              <div class="countdown" id="noonCountdown">--</div>
+              <div class="reminder-toggle">
+                <span>启用</span>
+                <label class="switch">
+                  <input type="checkbox" id="noonEnabled" checked onchange="updateReminderSettings()">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-mint check-btn" id="noonBtn" onclick="takeMedicine('noon')">已服用</button>
+            </div>
+            <div class="reminder-card" id="eveningCard">
+              <h3>晚上</h3>
+              <div class="reminder-time" id="eveningTime">18:00</div>
+              <div class="countdown" id="eveningCountdown">--</div>
+              <div class="reminder-toggle">
+                <span>启用</span>
+                <label class="switch">
+                  <input type="checkbox" id="eveningEnabled" checked onchange="updateReminderSettings()">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-mint check-btn" id="eveningBtn" onclick="takeMedicine('evening')">已服用</button>
+            </div>
+          </div>
+          <div class="modal-text" style="margin-bottom:0;font-size:12px;color:var(--text-light);line-height:1.5;">
+            💡 提示：PWA 页面需要保持在前台才能正常弹出提醒。建议配合手机系统闹钟使用，或点击右上角铃铛开启浏览器通知权限。
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>饮食打卡</h2>
+          <div class="diet-grid">
+            <div class="diet-card" id="vegetableCard" onclick="toggleDiet('vegetables')">
+              <div class="diet-icon">🥬</div>
+              <div class="diet-name">吃蔬菜</div>
+              <div class="diet-status" id="vegetableStatus">未完成</div>
+            </div>
+            <div class="diet-card" id="proteinCard" onclick="toggleDiet('protein')">
+              <div class="diet-icon">🥚</div>
+              <div class="diet-name">吃蛋白质</div>
+              <div class="diet-status" id="proteinStatus">未完成</div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
 
-  <nav class="bottom-nav">
-    <div class="bottom-nav-item active" data-tab="weight" onclick="switchTab('weight')">
-      <div class="bottom-nav-icon">⚖️</div>
-      <div>体重</div>
-    </div>
-    <div class="bottom-nav-item" data-tab="measurements" onclick="switchTab('measurements')">
-      <div class="bottom-nav-icon">📏</div>
-      <div>维度</div>
-    </div>
-    <div class="bottom-nav-item" data-tab="exercise" onclick="switchTab('exercise')">
-      <div class="bottom-nav-icon">🏃</div>
-      <div>运动</div>
-    </div>
-    <div class="bottom-nav-item" data-tab="reminders" onclick="switchTab('reminders')">
-      <div class="bottom-nav-icon">⏰</div>
-      <div>打卡</div>
-    </div>
-    <div class="bottom-nav-item" data-tab="charts" onclick="switchTab('charts')">
-      <div class="bottom-nav-icon">📊</div>
-      <div>图表</div>
-    </div>
-    <div class="bottom-nav-item" data-tab="goals" onclick="switchTab('goals')">
-      <div class="bottom-nav-icon">🎯</div>
-      <div>目标</div>
-    </div>
-  </nav>
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>今日总览</h2>
+          <div class="overview-grid">
+            <div class="overview-card">
+              <div class="value" id="todayMedicine">0/3</div>
+              <div class="label">今日已服药</div>
+            </div>
+            <div class="overview-card">
+              <div class="value" id="todayDiet">0/2</div>
+              <div class="label">今日饮食打卡</div>
+            </div>
+            <div class="overview-card">
+              <div class="value" id="todayExerciseMinutes">0</div>
+              <div class="label">今日运动 (分钟)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 数据图表 -->
+      <section class="tab-panel" id="tab-charts">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>体重趋势</h2>
+          <div class="chart-container">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="card">
+            <h2 class="card-title"><span class="dot"></span>维度变化</h2>
+            <div class="chart-container">
+              <canvas id="measurementChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h2 class="card-title"><span class="dot"></span>运动时长</h2>
+            <div class="chart-container">
+              <canvas id="exerciseDurationChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h2 class="card-title"><span class="dot"></span>热量消耗</h2>
+            <div class="chart-container">
+              <canvas id="caloriesChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h2 class="card-title"><span class="dot"></span>运动类型分布</h2>
+            <div class="chart-container">
+              <canvas id="exerciseTypeChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 目标设置 -->
+      <section class="tab-panel" id="tab-goals">
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>我的目标</h2>
+          <div class="goal-inputs">
+            <div class="form-group">
+              <label>起始体重 (kg)</label>
+              <input type="number" id="goalStartWeight" step="0.1" placeholder="例如 70">
+            </div>
+            <div class="form-group">
+              <label>目标体重 (kg)</label>
+              <input type="number" id="goalTargetWeight" step="0.1" placeholder="例如 60">
+            </div>
+            <div class="form-group">
+              <label>每日运动目标 (分钟)</label>
+              <input type="number" id="goalDailyExercise" step="1" placeholder="例如 30">
+            </div>
+            <div class="form-group">
+              <label>目标腰围 (cm)</label>
+              <input type="number" id="goalWaist" step="0.1" placeholder="例如 70">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveGoals()">保存目标</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><span class="dot"></span>目标进度</h2>
+          <div id="goalProgressContainer">
+            <div class="progress-section">
+              <div class="progress-header">
+                <span>体重进度</span>
+                <span id="weightProgressText">--</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="weightProgressBar" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span>腰围进度</span>
+                <span id="waistProgressText">--</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="waistProgressBar" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span>今日运动</span>
+                <span id="exerciseProgressText">--</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="exerciseProgressBar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <div id="toast"></div>
 
@@ -1305,7 +1346,7 @@
       loadData();
       initServiceWorker();
       initDateInputs();
-      initTabs();
+      initSidebar();
       updateUI();
       startReminderLoop();
       document.getElementById('todayDate').textContent = getTodayStr();
@@ -1326,27 +1367,20 @@
       document.getElementById('exerciseDate').value = today;
     }
 
-    function initTabs() {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          switchTab(btn.dataset.tab);
-        });
-      });
+    function initSidebar() {
+      // Sidebar navigation items already have onclick handlers in HTML
+      // No additional event listeners needed since we use inline onclick
     }
 
     function switchTab(tabName) {
       document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
 
       const panel = document.getElementById(`tab-${tabName}`);
       if (panel) panel.classList.add('active');
 
-      document.querySelectorAll(`[data-tab="${tabName}"]`).forEach(el => {
-        if (el.classList.contains('tab-btn') || el.classList.contains('bottom-nav-item')) {
-          el.classList.add('active');
-        }
-      });
+      const sidebarItem = document.querySelector(`.sidebar-item[data-tab="${tabName}"]`);
+      if (sidebarItem) sidebarItem.classList.add('active');
 
       if (tabName === 'charts') {
         setTimeout(renderCharts, 50);
@@ -1538,9 +1572,10 @@
     // Exercise
     // ===========================
     const exerciseTypeMap = {
-      aerobic: '有氧',
-      strength: '力量',
-      flexibility: '柔韧'
+      legs: '练腿',
+      abs: '练腹',
+      arms: '练手臂',
+      none: '不运动'
     };
 
     function addExercise() {
@@ -1613,7 +1648,6 @@
       const weights = appData.weights;
       const current = weights.length > 0 ? weights[weights.length - 1].weight : null;
       const start = appData.goals.startWeight;
-      const target = appData.goals.targetWeight;
 
       document.getElementById('currentWeight').textContent = current !== null ? current.toFixed(1) : '--';
 
@@ -1894,7 +1928,6 @@
 
       // Waist progress (current -> goal)
       if (latestWaist && goalWaist) {
-        // Assume starting waist is the earliest recorded
         const sorted = [...appData.measurements].filter(m => m.waist).sort((a, b) => parseDate(a.date) - parseDate(b.date));
         const startWaist = sorted.length > 0 ? sorted[0].waist : latestWaist;
         const total = startWaist - goalWaist;
@@ -2080,7 +2113,7 @@
     function renderExerciseTypeChart() {
       destroyChart('exerciseType');
       const ctx = document.getElementById('exerciseTypeChart').getContext('2d');
-      const counts = { aerobic: 0, strength: 0, flexibility: 0 };
+      const counts = { legs: 0, abs: 0, arms: 0, none: 0 };
       appData.exercises.forEach(ex => {
         if (counts[ex.type] !== undefined) counts[ex.type]++;
       });
@@ -2088,10 +2121,10 @@
       chartInstances.exerciseType = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['有氧', '力量', '柔韧'],
+          labels: ['练腿', '练腹', '练手臂', '不运动'],
           datasets: [{
-            data: [counts.aerobic, counts.strength, counts.flexibility],
-            backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1'],
+            data: [counts.legs, counts.abs, counts.arms, counts.none],
+            backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ccc'],
             borderWidth: 0
           }]
         },
